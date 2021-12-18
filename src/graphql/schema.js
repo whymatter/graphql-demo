@@ -40,6 +40,7 @@ var schema = buildSchema(`
   type Query {
     user(id: ID!): User
     users: [User!]!
+    boards: [Board!]!
   }
 
   type Mutation {
