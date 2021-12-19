@@ -8,8 +8,16 @@ class Board extends Model {
      * Returns the owner of the Board
      * @returns {User} The owner of the Board
      */
-    owner = async () => {
-        return await User.findByPk(this.ownerId);
+    owner = async (args, { userLoader }) => {
+        return await userLoader.load(this.ownerId);
+    }
+
+    /**
+     * Returns the posts on the Board
+     * @returns {Array<Post>} The posts on the Board
+     */
+    posts = async (args, { postByBoardIdLoader }) => {
+        return await postByBoardIdLoader.load(this.id);
     }
 }
 

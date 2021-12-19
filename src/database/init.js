@@ -1,6 +1,9 @@
 const sequelize = require('./connection');
 const { User, Board, Post } = require('../entities');
 
+/**
+ * Scaffold database with some entries
+ */
 async function initDb() {
     await sequelize.sync({force: true});
   
@@ -27,6 +30,24 @@ async function initDb() {
     const k8sBoard = await Board.create({
       name: 'Kubernetes',
       ownerId: oliver.id
+    });
+
+    const postDb1 = await Post.create({
+      text: 'Biete Nachhilfe in Datenbanken',
+      authorId: daniel.id,
+      boardId: dbBoard.id
+    });
+
+    const postDb2 = await Post.create({
+      text: 'Suche Nachhilfe für DB',
+      authorId: oliver.id,
+      boardId: dbBoard.id
+    });
+
+    const postK8s2 = await Post.create({
+      text: 'Noch jemand interesse an einem Kubernetes Vortrag?',
+      authorId: oliver.id,
+      boardId: k8sBoard.id
     });
 }
 
