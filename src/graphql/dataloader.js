@@ -1,4 +1,4 @@
-const { User, Board, Post } = require('../../entities');
+const { User, Board, Post } = require('../entities');
 const DataLoader = require('dataloader');
 const { Op } = require('sequelize');
 

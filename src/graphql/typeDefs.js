@@ -1,6 +1,6 @@
-var { buildSchema } = require('graphql');
+const { gql } = require('apollo-server-core');
 
-var schema = buildSchema(`
+const typeDefs = gql`
   type User {
     id: ID!
     name: String!
@@ -44,10 +44,13 @@ var schema = buildSchema(`
   }
 
   type Mutation {
-    createUser(userInput: UserInput!): User
-    creatPost(postInput: PostInput!): Post
-    createBoard(boardInput: BoardInput!): Board
+    createUser(userInput: UserInput!): User!
+    createPost(postInput: PostInput!): Post!
   }
-`);
 
-module.exports = schema;
+  type Subscription {
+    newPost(boardId: ID!): Post!
+  }
+`;
+
+module.exports = typeDefs;

@@ -1,9 +1,9 @@
-const schema = require('./schema');
-const resolver = require('./resolver');
-const rootDataloaderResolver = require('./dataloaderResolver');
+const typeDefs = require('./typeDefs');
+const simpleResolver = require('./simpleResolver');
+const dataloaderResolver = require('./dataloaderResolver');
 
 module.exports = {
-    schema,
-    resolver,
-    rootDataloaderResolver
+    typeDefs,
+    simpleResolver,
+    dataloaderResolver
 }

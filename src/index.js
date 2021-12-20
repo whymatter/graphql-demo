@@ -1,7 +1,13 @@
-var express = require('express');
-var { graphqlHTTP } = require('express-graphql');
+const http = require('http');
+const express = require('express');
+const { execute, subscribe } = require('graphql');
+const { ApolloServer } = require('apollo-server-express');
+const { ApolloServerPluginDrainHttpServer } = require('apollo-server-core');
+const { makeExecutableSchema } = require('@graphql-tools/schema');
+const { SubscriptionServer } = require('subscriptions-transport-ws');
+
 const initDb = require('./database/init');
-const { schema, resolver, rootDataloaderResolver } = require('./graphql');
+const { typeDefs, dataloaderResolver } = require('./graphql');
 const buildLoader = require('./graphql/dataloader');
 
 // Initialize database (create all tables)
@@ -21,21 +27,49 @@ app.use((req, resp, next) => {
   }
 });
 
-// Configure GraphQL route
-app.use('/graphql', (req, resp) => {
-  // Build a new set of DataLoaders, scoped to this request
-  // Important, because cache must not violate request barrieres
-  const loaders = buildLoader();
+(async () => {
+  const httpServer = http.createServer(app);
 
-  return graphqlHTTP({
-    schema: schema,                     // Pass schema
-    rootValue: rootDataloaderResolver,  // Pass root resolver
-    graphiql: true,                     // Enable GrahpiQL
-    context: loaders                    // Set DataLoaders as context
-  })(req, resp);
-});
+  // Combine typeDefs and resolver (required by SubscriptionServer)
+  const schema = makeExecutableSchema({ typeDefs, resolvers: dataloaderResolver });
 
-// Start Server
-app.listen(4000);
+  const subscriptionServer = SubscriptionServer.create({
+    schema,
+    // These are imported from `graphql`.
+    execute,
+    subscribe,
+  }, {
+    // This is the `httpServer` we created in a previous step.
+    server: httpServer,
+    // Pass a different path here if your ApolloServer serves at a different path.
+    path: '/graphql',
+ });
 
-console.log('Running a GraphQL API server at http://localhost:4000/graphql');
+  const server = new ApolloServer({
+    context: () => buildLoader(),
+    schema,
+    plugins: [
+      ApolloServerPluginDrainHttpServer({ httpServer }),
+      {
+        async serverWillStart() {
+          return {
+            async drainServer() {
+              subscriptionServer.close();
+            }
+          };
+        }
+      }
+    ],
+  });
+
+  // Start ApolloServer
+  await server.start();
+
+  // Add graphql to express pipeline
+  server.applyMiddleware({ app });
+  
+  // Start Server
+  httpServer.listen(4000);
+
+  console.log(`🚀 Server ready at http://localhost:4000${server.graphqlPath}`);
+})();

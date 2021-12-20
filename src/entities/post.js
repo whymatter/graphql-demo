@@ -10,6 +10,10 @@ class Post extends Model {
     author = async (args, { userLoader }) => {
         return await userLoader.load(this.authorId);
     };
+
+    board = async (args, { boardLoader }) => {
+        return await boardLoader.load(this.boardId);
+    };
 }
 
 Post.init({
