@@ -1,5 +1,7 @@
 # GraphQL VS REST
 
+![Apollo Sandbox](./doc/apollo-sandbox-01.png)
+
 ## Repository Structure
 
 ```
